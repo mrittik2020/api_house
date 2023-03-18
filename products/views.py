@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, mixins, permissions, authentication
 
 from .models import Product
 from .serializers import ProductSerializer
@@ -35,6 +35,34 @@ class ProductDetailApiView(generics.RetrieveAPIView):
 product_details_view = ProductDetailApiView.as_view()
 
 
+# Only Update 1 specific --View--> only_PUT
+class ProductUpdateApiView(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if not instance.content:
+            instance.content = instance.title
+
+
+product_Update_view = ProductUpdateApiView.as_view()
+
+
+# Only Delete 1 specific --View--> only_DELETE
+class ProductDeleteApiView(generics.DestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk'
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+
+
+product_Delete_view = ProductDeleteApiView.as_view()
+
+
 # Only Retrieve all list --View--> only_GET
 class ProductListApiView(generics.ListAPIView):
     queryset = Product.objects.all()
@@ -48,6 +76,8 @@ product_list_view = ProductListApiView.as_view()
 class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 product_list_create_view = ProductListCreateApiView.as_view()
