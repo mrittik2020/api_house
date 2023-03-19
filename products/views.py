@@ -5,6 +5,8 @@ from .serializers import ProductSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from .permission import IsStaffEditorPermission
+
 # from django.http import Http404
 from django.shortcuts import get_object_or_404
 
@@ -77,7 +79,7 @@ class ProductListCreateApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsStaffEditorPermission]
 
 
 product_list_create_view = ProductListCreateApiView.as_view()
@@ -87,7 +89,7 @@ product_list_create_view = ProductListCreateApiView.as_view()
 def product_all_views(request, pk=None, *args, **kwargs):
     method = request.method
 
-    if method == 'GET':  # get--Request
+    if method == 'GET':  # GET--Request
         if pk is not None:
             # Details Views---
             obj = get_object_or_404(Product, pk=pk)
